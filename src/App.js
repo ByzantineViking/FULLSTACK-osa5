@@ -5,7 +5,7 @@ import loginService from './services/login'
 import Footer from './components/Footer'
 import Notification from './components/Notification'
 import Blog from './components/Blog'
-
+import LoginForm from './components/Login'
 
 import './App.css'
 
@@ -17,7 +17,7 @@ const App = () => {
   const [titleField, setTitleField] = useState('')
   const [urlField, setUrlField] = useState('')
 
-  const [showAll, setShowAll] = useState(true)
+  const [loginVisible, setLoginVisible] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [message, setMessage] = useState(null)
   const [username, setUsername] = useState('')
@@ -65,29 +65,7 @@ const App = () => {
       }, 5000)
     }
   }
-  const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <div>
-        username
-          <input
-          type="text"
-          value={username}
-          name="Username"
-          onChange={({ target }) => setUsername(target.value)}
-        />
-      </div>
-      <div>
-        password
-          <input
-          type="password"
-          value={password}
-          name="Password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button type="submit">login</button>
-    </form>
-  )
+  
   const handleTitleChange = (event) => {
     event.preventDefault()
     setTitleField(event.target.value)
@@ -106,22 +84,25 @@ const App = () => {
   }
   const addBlog = async (event) => {
     event.preventDefault()
-    const blog = {
-      title : titleField,
-      author : authorField,
-      url : urlField
-    }
+    
   
     try {
-      await blogService.create(blog)
-      getBlogsS()
-      setMessage('Created a new blog')
-      setTimeout( () => {
-        setMessage(null)
-      }, 2000)
-      setTitleField('')
-      setAuthorField('')
-      setUrlField('')
+      if(titleField !== undefined && authorField !== undefined && urlField !== undefined) {
+        const blog = {
+          title: titleField,
+          author: authorField,
+          url: urlField
+        }
+        await blogService.create(blog)
+        getBlogsS()
+        setMessage('Created a new blog')
+        setTimeout(() => {
+          setMessage(null)
+        }, 2000)
+        setTitleField('')
+        setAuthorField('')
+        setUrlField('')
+      }
     } catch(error) {
       setErrorMessage(`!!!Error!!! ${error.message}`)
       setTimeout( () => {
@@ -132,6 +113,30 @@ const App = () => {
     
 
   }
+  const loginForm = () => {
+    const hideWhenVisible = { display: loginVisible ? 'none' : '' }
+    const showWhenVisible = { display: loginVisible ? '' : 'none' }
+
+    return (
+      <div>
+        <div style={hideWhenVisible}>
+          <button onClick={() => setLoginVisible(true)}>log in</button>
+        </div>
+        <div style={showWhenVisible}>
+          <LoginForm
+            username={username}
+            password={password}
+            setPassword={setPassword}
+            setUsername={setUsername}
+            handleLogin={handleLogin}
+          />
+          <button onClick={() => setLoginVisible(false)}>cancel</button>
+        </div>
+      </div>
+    )
+  }
+
+
   const blogForm = () => (
     <form onSubmit={addBlog}>
       Title: <input value={titleField} onChange={handleTitleChange}></input>
@@ -140,20 +145,15 @@ const App = () => {
       <button type="submit">save</button>
       <div>
         <h2>blogs</h2>
-        {blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} />
-        )}
+        {blogs
+          .sort((a, b) => b.likes - a.likes)
+          .map(blog => <Blog key={blog.id} blog={blog}/>)
+        }
+          
       </div>
     </form>
   )
-  const rows = () => {
-    return blogs.map(blog =>
-      <Blog
-        blog={blog}
-        key={blog.id}
-      />
-    )
-  }
+  
   return (
     <div>
       <h1>Blogs</h1>
