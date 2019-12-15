@@ -1,35 +1,32 @@
+/* eslint-disable no-unused-vars */
 import React from 'react'
 
 
 const LoginForm = ({
     handleLogin,
-    setUsername,
-    setPassword,
     username,
     password
 }) => {
+    const { clear: throwaway1, ...usernameWithourClear } = username
+    const { clear: throwaway2, ...passwordWithourClear } = password
     return(
-        <form onSubmit = { handleLogin } >
+        <form className='loginForm' onSubmit = { handleLogin } >
             <div>
                 username
-          <input
-                    type="text"
-                    value={username}
-                    name="Username"
-                    onChange={({ target }) => setUsername(target.value)}
+                <input
+                    name="username"
+                    {...usernameWithourClear}
                 />
             </div>
             <div>
                 password
-          <input
-                    type="password"
-                    value={password}
-                    name="Password"
-                    onChange={({ target }) => setPassword(target.value)}
+                <input
+                    name="password"
+                    {...passwordWithourClear}
                 />
             </div>
             <button type="submit">login</button>
-    </form >
+        </form >
     )
 }
 

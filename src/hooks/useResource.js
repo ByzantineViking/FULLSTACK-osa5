@@ -1,0 +1,68 @@
+import { useState } from 'react'
+import axios from 'axios'
+
+
+
+
+const useResource = (baseUrl) => {
+    const [resources, setResources] = useState([])
+
+
+    // This is the user token, which can be modified outside the module with setToken exported.
+    let token = null
+
+    const setToken = newToken => {
+        token = `bearer ${newToken}`
+    }
+
+
+
+    const getAll = async () => {
+        const request = axios.get(baseUrl)
+        const response = await request
+        setResources(response.data)
+        return response.data
+    }
+
+
+
+    const create = async newObject => {
+        if (newObject.titleField !== undefined && newObject.authorField !== undefined && newObject.urlField !== undefined) {
+            const config = {
+                headers: { Authorization: token },
+            }
+            const response = await axios.post(baseUrl, newObject, config)
+            setResources(response.data)
+            return response.data
+        }
+    }
+
+    const update = async (id, newObject) => {
+        const config = {
+            headers: { Authorization: token },
+        }
+        const request = axios.put(`${baseUrl}/${id}`, newObject, config)
+        const response = await request
+        setResources(response.data)
+        return response.data
+    }
+
+    const remove = async (id) => {
+        const config = {
+            headers: { Authorization: token },
+        }
+        const request = axios.delete(`${baseUrl}/${id}`, config)
+        const response = await request
+        setResources(response.data)
+        return response.data
+    }
+
+    const service = {
+        getAll, create, update, remove, setToken
+    }
+    return [
+        resources, service
+    ]
+}
+
+export default useResource
